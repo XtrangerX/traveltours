@@ -98,7 +98,7 @@ footer {
 </style>
 </head>
 
-<body>
+<body class="dark">
 
 <header>
 <h1>🌴 North Luzon Travel Guide</h1>
@@ -123,6 +123,15 @@ footer {
 <div class="container" id="spots">
 <h2 style="text-align:center;">⭐ Saved Favorites</h2>
 <div id="favorites" class="container"></div>
+
+<!-- Offline Directions to General Trias, Cavite -->
+<div class="card directions">
+  <h3>🛣️ Offline Directions to General Trias, Cavite</h3>
+  <p>Start typing your location to see step-by-step offline directions:</p>
+  <input type="text" id="start" placeholder="Enter your starting point">
+  <button onclick="showDirections()">Get Directions</button>
+  <div id="route" style="margin-top:10px;"></div>
+</div>
 
 <!-- Ilocos Sur -->
 <div class="card ilocos">
@@ -250,6 +259,63 @@ function loadFavorites(){
 }
 
 window.onload = loadFavorites;
+
+function showDirections(){
+    let start = document.getElementById("start").value.toLowerCase();
+    let route = document.getElementById("route");
+    route.innerHTML = "";
+
+    let directions = "";
+
+    if(start.includes("manila")){
+        directions = `
+        1. Take EDSA southbound.<br>
+        2. Merge to CAVITEX toward Cavite.<br>
+        3. Exit at General Trias / Imus.<br>
+        4. Follow local roads to your destination.<br>
+        📍 Approx. 35 km, 1 hr.`;
+    } 
+    else if(start.includes("tagaytay")){
+        directions = `
+        1. Take Tagaytay–Nasugbu Road northbound.<br>
+        2. Merge to Governor's Drive heading west.<br>
+        3. Follow signs to General Trias.<br>
+        📍 Approx. 45 km, 1 hr 10 min.`;
+    } 
+    else if(start.includes("cavite")){
+        directions = `
+        1. Head toward Governor's Drive.<br>
+        2. Follow signs to General Trias.<br>
+        📍 Approx. 10–15 km, 20–30 min.`;
+    } 
+    else if(start.includes("pangasinan")){
+        directions = `
+        1. Take Tarlac–Pangasinan–La Union Expressway (TPLEX) southbound.<br>
+        2. Exit at Mabalacat or Angeles, merge to MacArthur Highway.<br>
+        3. Continue south toward Cavite via NLEX.<br>
+        4. Take Cavite exit and follow signs to General Trias.<br>
+        📍 Approx. 250 km, 5–6 hrs.`;
+    } 
+    else if(start.includes("ilocos") || start.includes("ilocos sur")){
+        directions = `
+        1. Take MacArthur Highway (or NLEX) southbound.<br>
+        2. Merge to TPLEX, continue south.<br>
+        3. Exit at Cavite or Bacoor, follow local roads to General Trias.<br>
+        📍 Approx. 400 km, 7–8 hrs.`;
+    } 
+    else if(start.includes("la union")){
+        directions = `
+        1. Take MacArthur Highway (NLEX) southbound.<br>
+        2. Continue via TPLEX to Cavite exit.<br>
+        3. Follow local roads to General Trias.<br>
+        📍 Approx. 350 km, 6–7 hrs.`;
+    } 
+    else {
+        directions = "Sorry, offline directions are only available for Manila, Tagaytay, Cavite, Pangasinan, Ilocos Sur, or La Union.";
+    }
+
+    route.innerHTML = directions;
+}
 
 </script>
 
