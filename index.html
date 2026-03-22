@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="manifest" href="manifest.json">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>North Luzon Travel Guide</title>
+<link rel="manifest" href="manifest.json">
 
 <style>
 :root {
@@ -33,21 +33,23 @@ header {
     padding:15px;
 }
 
-/* Controls */
+/* Tabs */
 .controls {
     padding:10px;
     text-align:center;
 }
-input {
-    padding:8px;
-    width:60%;
-    max-width:300px;
-}
-button {
-    padding:8px 12px;
-    margin:5px;
+.tabButton {
+    padding:10px 20px;
     cursor:pointer;
+    border:none;
+    background:#2c3e50;
+    color:white;
+    margin-right:5px;
+    border-radius:5px 5px 0 0;
+    transition:0.2s;
 }
+.tabButton:hover { background:#34495e; }
+.tabButton.active { background:#1abc9c; color:white; }
 
 /* Cards */
 .container {
@@ -61,18 +63,8 @@ button {
     box-shadow:0 0 5px rgba(0,0,0,0.2);
     transition:0.3s;
 }
-.card:hover {
-    transform:scale(1.02);
-}
-img {
-    width:100%;
-    border-radius:10px;
-}
-
-/* Hidden */
-.hidden {
-    display:none;
-}
+.card:hover { transform:scale(1.02); }
+img { width:100%; border-radius:10px; }
 
 /* Modal */
 .modal {
@@ -89,232 +81,269 @@ img {
     margin-top:5%;
 }
 
+/* Buttons */
+button.remove, button.clear, button.edit, button.saveEdit {
+    background:#e74c3c;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    margin-top:5px;
+    cursor:pointer;
+    border-radius:5px;
+}
+button.edit { background:#f39c12; margin-left:5px; }
+button.saveEdit { background:#1abc9c; margin-left:5px; }
+
+/* Footer */
 footer {
     text-align:center;
     padding:10px;
     background:var(--primary);
     color:white;
 }
+
+/* Offline directions input/button */
+.card input, .card button, textarea {
+    display:block;
+    width:100%;
+    margin-top:8px;
+    padding:10px;
+    border-radius:5px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+    font-size:14px;
+}
+.card button {
+    cursor:pointer;
+    transition:0.2s;
+}
+.card button:hover { opacity:0.9; }
+
+/* Scrollable lists for Favorites & Suggestions */
+#favorites, #suggestionList {
+    max-height:400px;
+    overflow-y:auto;
+}
+#suggestionList li { margin-bottom:5px; }
 </style>
 </head>
 
 <body class="dark">
 
 <header>
-<h1>🌴 North Luzon Travel Guide</h1>
-<p>Ilocos Sur • La Union • Pangasinan</p>
+    <h1>🌴 North Luzon Travel Guide</h1>
+    <p>Ilocos Sur • La Union • Pangasinan</p>
 </header>
 
-<div class="controls">
-<input type="text" id="search" placeholder="Search tourist spot..." onkeyup="searchSpot()">
-
-<br>
-
-<button onclick="filterRegion('all')">All</button>
-<button onclick="filterRegion('ilocos')">Ilocos Sur</button>
-<button onclick="filterRegion('launion')">La Union</button>
-<button onclick="filterRegion('pangasinan')">Pangasinan</button>
-
-<br>
+<!-- Tabs -->
+<div class="controls" id="tabsControl">
+    <button class="tabButton active" onclick="showTab('guide', this)">🌴 Travel Guide</button>
+    <button class="tabButton" onclick="showTab('favorites', this)">❤️ Favorites</button>
+    <button class="tabButton" onclick="showTab('suggestions', this)">💡 Suggestions</button>
 </div>
 
-<div class="container" id="spots">
-<h2 style="text-align:center;">⭐ Saved Favorites</h2>
-<div id="favorites" class="container"></div>
+<!-- Travel Guide Tab -->
+<div id="guide" class="tabContent">
+    <div class="container" id="spots">
+        <!-- Offline Directions Card -->
+        <div class="card directions">
+            <h3>🛣️ Offline Directions to General Trias, Cavite</h3>
+            <p>Start typing your location to see step-by-step offline directions:</p>
+            <input type="text" id="start" placeholder="Enter your starting point">
+            <button onclick="showDirections()">Get Directions</button>
+            <div id="route" style="margin-top:10px;"></div>
+        </div>
 
-<!-- Offline Directions to General Trias, Cavite -->
-<div class="card directions">
-  <h3>🛣️ Offline Directions to General Trias, Cavite</h3>
-  <p>Start typing your location to see step-by-step offline directions:</p>
-  <input type="text" id="start" placeholder="Enter your starting point">
-  <button onclick="showDirections()">Get Directions</button>
-  <div id="route" style="margin-top:10px;"></div>
+        <!-- Ilocos Sur -->
+        <div class="card ilocos">
+            <h3>Vigan City ❤️</h3>
+            <img src="images/vigan.jpg" onclick="openModal(this.src)">
+            <p>Historic UNESCO heritage city.</p>
+            <button onclick="saveFav('Vigan City')">❤️ Save</button>
+        </div>
+        <div class="card ilocos">
+            <h3>Calle Crisologo</h3>
+            <img src="images/calle.jpg" onclick="openModal(this.src)">
+            <p>Famous cobblestone street.</p>
+            <button onclick="saveFav('Calle Crisologo')">❤️ Save</button>
+        </div>
+        <div class="card bantay">
+            <h3>Bantay Tower Bell Church</h3>
+            <img src="images/bantay.jpg" onclick="openModal(this.src)">
+            <p>Famous Church in Vigan.</p>
+            <button onclick="saveFav('Bantay Tower Bell Church')">❤️ Save</button>
+        </div>
+
+        <!-- La Union -->
+        <div class="card launion">
+            <h3>San Juan Beach</h3>
+            <img src="images/sanjuan.jpg" onclick="openModal(this.src)">
+            <p>Surfing capital of the north.</p>
+            <button onclick="saveFav('San Juan Beach')">❤️ Save</button>
+        </div>
+        <div class="card launion">
+            <h3>Tangadan Falls</h3>
+            <img src="images/tangadan.jpg" onclick="openModal(this.src)">
+            <p>Beautiful waterfall adventure.</p>
+            <button onclick="saveFav('Tangadan Falls')">❤️ Save</button>
+        </div>
+
+        <!-- Pangasinan -->
+        <div class="card pangasinan">
+            <h3>Hundred Islands</h3>
+            <img src="images/hundredislands.jpg" onclick="openModal(this.src)">
+            <p>Over 100 islands to explore.</p>
+            <button onclick="saveFav('Hundred Islands')">❤️ Save</button>
+        </div>
+        <div class="card pangasinan">
+            <h3>Bolinao Lighthouse</h3>
+            <img src="images/bolinao.jpg" onclick="openModal(this.src)">
+            <p>Scenic ocean views.</p>
+            <button onclick="saveFav('Bolinao Lighthouse')">❤️ Save</button>
+        </div>
+    </div>
 </div>
 
-<!-- Ilocos Sur -->
-<div class="card ilocos">
-<h3>Vigan City ❤️</h3>
-<img src="images/vigan.jpg" onclick="openModal(this.src)">
-<p>Historic UNESCO heritage city.</p>
-<button onclick="saveFav('Vigan City')">❤️ Save</button>
+<!-- Favorites Tab -->
+<div id="favoritesTab" class="tabContent" style="display:none;">
+    <div class="container">
+        <button class="clear" onclick="clearFavorites()">🗑️ Clear All Favorites</button>
+        <div id="favorites"></div>
+    </div>
 </div>
 
-<div class="card ilocos">
-<h3>Calle Crisologo</h3>
-<img src="images/calle.jpg" onclick="openModal(this.src)">
-<p>Famous cobblestone street.</p>
-<button onclick="saveFav('Calle Crisologo')">❤️ Save</button>
-</div>
-
-<div class="card bantay">
-<h3>Bantay tower bell church</h3>
-<img src="images/bantay.jpg" onclick="openModal(this.src)">
-<p>Famous Church in vigan.</p>
-<button onclick="saveFav('Calle Crisologo')">❤️ Save</button>
-</div>
-
-<!-- La Union -->
-<div class="card launion">
-<h3>San Juan Beach</h3>
-<img src="images/sanjuan.jpg" onclick="openModal(this.src)">
-<p>Surfing capital of the north.</p>
-<button onclick="saveFav('San Juan Beach')">❤️ Save</button>
-</div>
-
-<div class="card launion">
-<h3>Tangadan Falls</h3>
-<img src="images/tangadan.jpg" onclick="openModal(this.src)">
-<p>Beautiful waterfall adventure.</p>
-<button onclick="saveFav('Tangadan Falls')">❤️ Save</button>
-</div>
-
-<!-- Pangasinan -->
-<div class="card pangasinan">
-<h3>Hundred Islands</h3>
-<img src="images/hundredislands.jpg" onclick="openModal(this.src)">
-<p>Over 100 islands to explore.</p>
-<button onclick="saveFav('Hundred Islands')">❤️ Save</button>
-</div>
-
-<div class="card pangasinan">
-<h3>Bolinao Lighthouse</h3>
-<img src="images/bolinao.jpg" onclick="openModal(this.src)">
-<p>Scenic ocean views.</p>
-<button onclick="saveFav('Bolinao Lighthouse')">❤️ Save</button>
-</div>
-
+<!-- Suggestions Tab -->
+<div id="suggestionTab" class="tabContent" style="display:none;">
+    <div class="container">
+        <textarea id="suggestionInput" placeholder="Write your suggestion here..." rows="4"></textarea>
+        <button onclick="saveSuggestion()">Submit</button>
+        <button class="clear" onclick="clearSuggestions()">🗑️ Clear All Suggestions</button>
+        <h4 style="margin-top:15px;">Your Suggestions:</h4>
+        <ul id="suggestionList" style="list-style-type:disc;padding-left:20px;"></ul>
+    </div>
 </div>
 
 <footer>
-<p>© 2026 North Luzon Travel Guide</p>
+    <p>© 2026 North Luzon Travel Guide</p>
 </footer>
 
 <!-- Modal -->
 <div id="modal" class="modal" onclick="closeModal()">
-<img id="modalImg">
+    <img id="modalImg">
 </div>
 
 <script>
-function toggleDark(){
-    document.body.classList.toggle("dark");
-}
+/* ----------------- Dark Mode ----------------- */
+if(localStorage.getItem("darkMode")==="true") document.body.classList.add("dark");
 
-function openModal(src){
-    document.getElementById("modal").style.display="block";
-    document.getElementById("modalImg").src=src;
-}
-function closeModal(){
-    document.getElementById("modal").style.display="none";
-}
+/* ----------------- Modal ----------------- */
+function openModal(src){ document.getElementById("modal").style.display="block"; document.getElementById("modalImg").src=src; }
+function closeModal(){ document.getElementById("modal").style.display="none"; }
 
-/* Search */
-function searchSpot(){
-    let input=document.getElementById("search").value.toLowerCase();
-    let cards=document.querySelectorAll(".card");
-
-    cards.forEach(card=>{
-        let text=card.innerText.toLowerCase();
-        card.style.display = text.includes(input) ? "block":"none";
-    });
-}
-
-/* Filter */
-function filterRegion(region){
-    let cards=document.querySelectorAll(".card");
-
-    cards.forEach(card=>{
-        if(region==="all"){
-            card.style.display="block";
-        } else {
-            card.style.display = card.classList.contains(region) ? "block":"none";
-        }
-    });
-}
-
-/* Favorites */
+/* ----------------- Favorites ----------------- */
 function saveFav(place){
-    let favs = JSON.parse(localStorage.getItem("favorites")) || [];
-    favs.push(place);
-    localStorage.setItem("favorites", JSON.stringify(favs));
-    alert(place + " saved!");
+    let favs=JSON.parse(localStorage.getItem("favorites"))||[];
+    if(!favs.includes(place)){ favs.push(place); localStorage.setItem("favorites",JSON.stringify(favs)); alert(place+" saved!"); }
+    else alert(place+" is already in favorites!");
 }
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('service-worker.js');
-}
-
 function loadFavorites(){
-    let favs = JSON.parse(localStorage.getItem("favorites")) || [];
-    let container = document.getElementById("favorites");
-    container.innerHTML = "";
-
-    favs.forEach(place=>{
-        let div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = "<h3>" + place + "</h3>";
+    let favs=JSON.parse(localStorage.getItem("favorites"))||[];
+    let container=document.getElementById("favorites");
+    container.innerHTML="";
+    favs.forEach((place,index)=>{
+        let div=document.createElement("div");
+        div.className="card";
+        div.innerHTML=`<h3>${place}</h3><button onclick="removeFav(${index})" class="remove">🗑️ Remove</button>`;
         container.appendChild(div);
     });
 }
+function removeFav(index){
+    let favs=JSON.parse(localStorage.getItem("favorites"))||[];
+    favs.splice(index,1);
+    localStorage.setItem("favorites",JSON.stringify(favs));
+    loadFavorites();
+}
+function clearFavorites(){ if(confirm("Are you sure you want to remove all favorites?")){ localStorage.removeItem("favorites"); loadFavorites(); } }
 
-window.onload = loadFavorites;
-
-function showDirections(){
-    let start = document.getElementById("start").value.toLowerCase();
-    let route = document.getElementById("route");
-    route.innerHTML = "";
-
-    let directions = "";
-
-    if(start.includes("manila")){
-        directions = `
-        1. Take EDSA southbound.<br>
-        2. Merge to CAVITEX toward Cavite.<br>
-        3. Exit at General Trias / Imus.<br>
-        4. Follow local roads to your destination.<br>
-        📍 Approx. 35 km, 1 hr.`;
-    } 
-    else if(start.includes("tagaytay")){
-        directions = `
-        1. Take Tagaytay–Nasugbu Road northbound.<br>
-        2. Merge to Governor's Drive heading west.<br>
-        3. Follow signs to General Trias.<br>
-        📍 Approx. 45 km, 1 hr 10 min.`;
-    } 
-    else if(start.includes("cavite")){
-        directions = `
-        1. Head toward Governor's Drive.<br>
-        2. Follow signs to General Trias.<br>
-        📍 Approx. 10–15 km, 20–30 min.`;
-    } 
-    else if(start.includes("pangasinan")){
-        directions = `
-        1. Take Tarlac–Pangasinan–La Union Expressway (TPLEX) southbound.<br>
-        2. Exit at Mabalacat or Angeles, merge to MacArthur Highway.<br>
-        3. Continue south toward Cavite via NLEX.<br>
-        4. Take Cavite exit and follow signs to General Trias.<br>
-        📍 Approx. 250 km, 5–6 hrs.`;
-    } 
-    else if(start.includes("ilocos") || start.includes("ilocos sur")){
-        directions = `
-        1. Take MacArthur Highway (or NLEX) southbound.<br>
-        2. Merge to TPLEX, continue south.<br>
-        3. Exit at Cavite or Bacoor, follow local roads to General Trias.<br>
-        📍 Approx. 400 km, 7–8 hrs.`;
-    } 
-    else if(start.includes("la union")){
-        directions = `
-        1. Take MacArthur Highway (NLEX) southbound.<br>
-        2. Continue via TPLEX to Cavite exit.<br>
-        3. Follow local roads to General Trias.<br>
-        📍 Approx. 350 km, 6–7 hrs.`;
-    } 
-    else {
-        directions = "Sorry, offline directions are only available for Manila, Tagaytay, Cavite, Pangasinan, Ilocos Sur, or La Union.";
-    }
-
-    route.innerHTML = directions;
+/* ----------------- Tabs ----------------- */
+function showTab(tabName,btn){
+    document.querySelectorAll('.tabContent').forEach(tab=>tab.style.display='none');
+    document.querySelectorAll('.tabButton').forEach(button=>button.classList.remove('active'));
+    if(tabName==='guide') document.getElementById('guide').style.display='block';
+    if(tabName==='favorites') document.getElementById('favoritesTab').style.display='block';
+    if(tabName==='suggestions') document.getElementById('suggestionTab').style.display='block';
+    if(btn) btn.classList.add('active');
 }
 
+/* ----------------- Suggestions ----------------- */
+function saveSuggestion(){
+    let input=document.getElementById("suggestionInput");
+    let suggestion=input.value.trim();
+    if(suggestion==="") return alert("Please enter a suggestion.");
+    let suggestions=JSON.parse(localStorage.getItem("suggestions"))||[];
+    suggestions.push(suggestion);
+    localStorage.setItem("suggestions",JSON.stringify(suggestions));
+    input.value="";
+    loadSuggestions();
+}
+
+function loadSuggestions(){
+    let suggestions=JSON.parse(localStorage.getItem("suggestions"))||[];
+    let list=document.getElementById("suggestionList");
+    list.innerHTML="";
+    suggestions.forEach((sug,index)=>{
+        let li=document.createElement("li");
+        li.innerHTML=`<span>${sug}</span> 
+        <button onclick="editSuggestion(${index})" class="edit">✏️ Edit</button>
+        <button onclick="removeSuggestion(${index})" class="remove">🗑️</button>`;
+        list.appendChild(li);
+    });
+}
+
+function removeSuggestion(index){
+    let suggestions=JSON.parse(localStorage.getItem("suggestions"))||[];
+    suggestions.splice(index,1);
+    localStorage.setItem("suggestions",JSON.stringify(suggestions));
+    loadSuggestions();
+}
+
+function editSuggestion(index){
+    let suggestions=JSON.parse(localStorage.getItem("suggestions"))||[];
+    let newText=prompt("Edit your suggestion:",suggestions[index]);
+    if(newText!==null && newText.trim()!==""){
+        suggestions[index]=newText.trim();
+        localStorage.setItem("suggestions",JSON.stringify(suggestions));
+        loadSuggestions();
+    }
+}
+
+function clearSuggestions(){ if(confirm("Are you sure you want to remove all suggestions?")){ localStorage.removeItem("suggestions"); loadSuggestions(); } }
+
+/* ----------------- Offline Directions ----------------- */
+function showDirections() {
+    let start=document.getElementById("start").value.toLowerCase();
+    let route=document.getElementById("route"); route.innerHTML="";
+    let directions="";
+    if(start.includes("manila")) directions=`1. Take EDSA southbound.<br>2. Merge to CAVITEX toward Cavite.<br>3. Exit at General Trias / Imus.<br>4. Follow local roads.<br>📍 Approx. 35 km, 1 hr.`;
+    else if(start.includes("tagaytay")) directions=`1. Take Tagaytay–Nasugbu Road northbound.<br>2. Merge to Governor's Drive.<br>3. Follow signs to General Trias.<br>📍 Approx. 45 km, 1 hr 10 min.`;
+    else if(start.includes("cavite")) directions=`1. Head toward Governor's Drive.<br>2. Follow signs to General Trias.<br>📍 Approx. 10–15 km, 20–30 min.`;
+    else if(start.includes("pangasinan")) directions=`1. Take TPLEX southbound.<br>2. Exit at Mabalacat or Angeles.<br>3. Continue via NLEX to Cavite.<br>📍 Approx. 250 km, 5–6 hrs.`;
+    else if(start.includes("ilocos")||start.includes("ilocos sur")) directions=`1. Take MacArthur Highway southbound.<br>2. Merge to TPLEX.<br>3. Exit at Cavite or Bacoor.<br>📍 Approx. 400 km, 7–8 hrs.`;
+    else if(start.includes("la union")) directions=`1. Take MacArthur Highway southbound.<br>2. Continue via TPLEX to Cavite exit.<br>3. Follow local roads.<br>📍 Approx. 350 km, 6–7 hrs.`;
+    else directions="Sorry, offline directions are only available for Manila, Tagaytay, Cavite, Pangasinan, Ilocos Sur, or La Union.";
+    route.innerHTML=directions;
+}
+
+/* ----------------- Initialize ----------------- */
+window.onload=function(){
+    loadFavorites();
+    loadSuggestions();
+    let defaultBtn=document.querySelector('.tabButton.active')||document.querySelector('.tabButton');
+    showTab('guide',defaultBtn);
+};
+
+/* ----------------- Service Worker ----------------- */
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('service-worker.js'); }
 </script>
 
 </body>
